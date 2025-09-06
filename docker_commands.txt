@@ -1,0 +1,15 @@
+fat image:
+sudo docker build --no-cache -f Dockerfile.fat -t pytorch-infer-fat .
+sudo docker run --rm -v /home/negan/MyProjects/mlops.hw1:/app/pict  pytorch-infer-fat /app/pict/example.jpg
+
+slim image:
+sudo docker build --no-cache -f Dockerfile.slim -t pytorch-infer-slim .
+sudo docker run --rm -v /home/negan/MyProjects/mlops.hw1:/app/pict  pytorch-infer-slim /app/pict/example.jpg
+
+multistage image:
+sudo docker build --no-cache -f Dockerfile.multistage -t pytorch-infer-multistage .
+sudo docker run --rm -v /home/negan/MyProjects/mlops.hw1:/app/pict  pytorch-infer-multistage /app/pict/example.jpg
+
+pytorchless (onnxruntime) image:
+sudo docker build --no-cache -f Dockerfile.onnx -t pytorch-infer-onnx .
+sudo docker run --rm -v /home/negan/MyProjects/mlops.hw1:/app/pict  pytorch-infer-onnx /app/pict/example.jpg

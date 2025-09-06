@@ -1,0 +1,24 @@
+# =========================
+# 1. Base stage
+# =========================
+FROM python:3.11-slim
+
+# Мінімальні змінні середовища
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Встановлюємо потрібні системні бібліотеки для ONNX Runtime та Pillow
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgl1 libglib2.0-0 libjpeg-dev zlib1g-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Встановлюємо ONNX Runtime CPU і Pillow
+RUN pip install --no-cache-dir onnxruntime pillow numpy
+
+# Копіюємо код і модель
+WORKDIR /app
+COPY app/ /app/
+COPY model/ /app/model/
+
+ENTRYPOINT ["python3", "onnx_inference.py"]

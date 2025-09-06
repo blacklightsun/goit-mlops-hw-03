@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+
+FROM python:3.11-slim AS base
+
+# Мінімальні змінні середовища
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PATH=/venv/bin:$PATH
+
+# Встановлюємо лише потрібні системні пакети (без рекомендацій),
+# потрібні для Pillow (PIL) та для роботи бінарних wheel'ів PyTorch.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    build-essential \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpng-dev \
+    libopenblas-dev \
+    wget && \
+    rm -rf /var/lib/apt/lists/*
+
+# Віртуальне оточення (чистіше, простіше копіювати/видаляти)
+RUN python -m venv /venv && /venv/bin/pip install --upgrade pip setuptools wheel
+
+# Встановлюємо CPU-only PyTorch wheels (менше за обсягом, ніж CUDA)
+# Використовуємо офіційний індекс PyTorch для CPU whl.
+# Якщо вам потрібна CUDA, прибрати --extra-index-url і вибрати відповідні whl.
+RUN /venv/bin/pip install --no-cache-dir \
+    typing_extensions \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    torch torchvision pillow
+
+# Копіюємо код додатку
+WORKDIR /app
+COPY app/ /app/
+COPY model/ /app/model/
+
+ENTRYPOINT ["python3", "inference.py"]

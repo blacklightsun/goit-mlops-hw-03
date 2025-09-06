@@ -1,0 +1,9 @@
+Docker version 28.3.3, build 980b856
+Docker Compose version v2.39.1
+Python 3.12.3
+pip 24.0 from /usr/lib/python3/dist-packages/pip (python 3.12)
+torch                    2.8.0
+torchvision              0.23.0
+torchvision              0.23.0
+pillow                   11.3.0
+Django                   5.2.5

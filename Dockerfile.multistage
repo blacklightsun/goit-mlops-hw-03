@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1
+
+# =========================
+# 1. Build stage
+# =========================
+FROM python:3.11-slim AS build
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PATH=/venv/bin:$PATH
+
+# Встановлюємо лише потрібні системні пакети для збірки та PIL
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpng-dev \
+    libopenblas-dev \
+    wget && \
+    rm -rf /var/lib/apt/lists/*
+
+# Створюємо віртуальне оточення
+RUN python -m venv /venv && /venv/bin/pip install --upgrade pip setuptools wheel
+
+# Встановлюємо потрібні пакети
+RUN /venv/bin/pip install --no-cache-dir \
+    typing_extensions \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    torch torchvision pillow
+
+# =========================
+# 2. Final stage
+# =========================
+FROM python:3.11-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH=/venv/bin:$PATH
+
+# Копіюємо готове віртуальне оточення з build stage
+COPY --from=build /venv /venv
+
+# Копіюємо код додатку
+    WORKDIR /app
+    COPY app/ /app/
+    COPY model/ /app/model/
+
+    ENTRYPOINT ["python3", "inference.py"]
+
